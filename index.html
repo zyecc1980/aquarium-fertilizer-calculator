@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор дозировок удобрений для аквариума</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --accent-dim: #0891b2;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --input-bg: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #22d3ee, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card h2 .icon {
+      font-size: 1.3rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    input::placeholder {
+      color: #64748b;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22d3ee, #0891b2);
+      color: #0f172a;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(34, 211, 238, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      font-size: 0.85rem;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+    }
+
+    .fertilizer-item {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .fertilizer-item .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .fertilizer-item h3 {
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    .elements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+    }
+
+    .element-input label {
+      font-size: 0.75rem;
+    }
+
+    .element-input input {
+      padding: 8px;
+      font-size: 0.9rem;
+    }
+
+    .results {
+      margin-top: 24px;
+    }
+
+    .result-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .result-card h3 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .result-table th,
+    .result-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-table th {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.8rem;
+    }
+
+    .result-table td.dose {
+      font-weight: 700;
+      color: var(--success);
+      font-size: 1.05rem;
+    }
+
+    .result-table td.warning {
+      color: var(--warning);
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .info-box {
+      background: rgba(34, 211, 238, 0.08);
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .info-box strong {
+      color: var(--accent);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .tab.active {
+      background: rgba(34, 211, 238, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .unit-select {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .unit-select label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌿 Калькулятор дозировок удобрений</h1>
+      <p>Универсальный расчёт для аквариумных растений</p>
+    </header>
+
+    <div class="info-box">
+      <strong>Как пользоваться:</strong><br>
+      1. Укажите объём аквариума и целевые концентрации элементов.<br>
+      2. Добавьте свои удобрения и введите их состав (концентрацию элементов в растворе или сухом виде).<br>
+      3. Нажмите «Рассчитать» — получите рекомендуемую дозировку каждого удобрения.
+    </div>
+
+    <div class="grid">
+      <!-- Левая колонка: параметры аквариума -->
+      <div class="card">
+        <h2><span class="icon">🐠</span> Параметры аквариума</h2>
+
+        <div class="form-group">
+          <label>Объём аквариума (литры)</label>
+          <input type="number" id="volume" value="100" min="1" step="1">
+        </div>
+
+        <h3 style="font-size:0.95rem; margin:18px 0 10px; color:var(--muted);">Условия аквариума</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Свет (Вт)</label>
+            <input type="number" id="lightWatts" value="50" min="0" step="1">
+          </div>
+          <div class="form-group">
+            <label>CO₂</label>
+            <select id="hasCO2">
+              <option value="no">Нет</option>
+              <option value="yes">Есть</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Количество растений</label>
+            <select id="plantDensity">
+              <option value="low">Мало</option>
+              <option value="medium" selected>Средне</option>
+              <option value="high">Много</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Тип роста</label>
+            <select id="growthRate">
+              <option value="slow">Медленнорастущие</option>
+              <option value="mixed" selected>Смешанные</option>
+              <option value="fast">Быстрорастущие</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Тип расчёта</label>
+          <select id="calcMode">
+            <option value="toTarget">Довести до целевой (с учётом текущей)</option>
+            <option value="fromZero">Добавить с нуля</option>
+            <option value="daily" selected>Рекомендуемая поддержка (с учётом условий)</option>
+          </select>
+        </div>
+
+        <h3 style="font-size:0.95rem; margin:18px 0 10px; color:var(--muted);">Целевые концентрации (мг/л)</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>NO₃ (нитраты)</label>
+            <input type="number" id="target_NO3" value="20" min="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Текущий NO₃</label>
+            <input type="number" id="current_NO3" value="0" min="0" step="0.1">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>PO₄ (фосфаты)</label>
+            <input type="number" id="target_PO4" value="1.5" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Текущий PO₄</label>
+            <input type="number" id="current_PO4" value="0" min="0" step="0.01">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>K (калий)</label>
+            <input type="number" id="target_K" value="20" min="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Текущий K</label>
+            <input type="number" id="current_K" value="0" min="0" step="0.1">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fe (железо)</label>
+            <input type="number" id="target_Fe" value="0.5" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Текущий Fe</label>
+            <input type="number" id="current_Fe" value="0" min="0" step="0.01">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mg (магний)</label>
+            <input type="number" id="target_Mg" value="10" min="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Текущий Mg</label>
+            <input type="number" id="current_Mg" value="0" min="0" step="0.1">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ca (кальций)</label>
+            <input type="number" id="target_Ca" value="30" min="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Текущий Ca</label>
+            <input type="number" id="current_Ca" value="0" min="0" step="0.1">
+          </div>
+        </div>
+
+        <h3 style="font-size:0.95rem; margin:18px 0 10px; color:var(--muted);">Жёсткость воды (°dH)</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>GH (цель)</label>
+            <input type="number" id="target_GH" value="6" min="0" step="0.5">
+          </div>
+          <div class="form-group">
+            <label>GH (текущий)</label>
+            <input type="number" id="current_GH" value="6" min="0" step="0.5">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>KH (цель)</label>
+            <input type="number" id="target_KH" value="4" min="0" step="0.5">
+          </div>
+          <div class="form-group">
+            <label>KH (текущий)</label>
+            <input type="number" id="current_KH" value="0" min="0" step="0.5">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>TDS (цель, ppm)</label>
+            <input type="number" id="target_TDS" value="150" min="0" step="10">
+          </div>
+          <div class="form-group">
+            <label>TDS (текущий, ppm)</label>
+            <input type="number" id="current_TDS" value="150" min="0" step="10">
+          </div>
+        </div>
+
+        <p class="note" style="margin-top:4px; color:#64748b;">
+          ℹ️ Ваша вода: осмос TDS 3 + Aquabalance GH-бустер → TDS ~150, GH ~6.<br>
+          После ремина примерно: Ca ~30–40 мг/л, Mg ~7–11 мг/л (оценка). Нет точных тестов — можно оставить 0 или подставить оценку.<br>
+          GH 4–8 · KH 3–6 °dH · TDS ~150 — ваша база.
+        </p>
+      </div>
+
+      <!-- Правая колонка: удобрения -->
+      <div class="card">
+        <h2><span class="icon">🧪</span> Ваши удобрения</h2>
+
+        <div class="unit-select">
+          <label><input type="radio" name="unitType" value="liquid" checked> Жидкие (мг/мл или %)</label>
+          <label><input type="radio" name="unitType" value="dry"> Сухие (мг/г или %)</label>
+        </div>
+
+        <div id="fertilizersList"></div>
+
+        <button class="btn btn-secondary" onclick="addFertilizer()" style="width:100%; margin-bottom:12px;">
+          + Добавить удобрение
+        </button>
+
+        <button class="btn btn-primary" onclick="calculate()">
+          Рассчитать дозировки
+        </button>
+
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <button class="btn btn-secondary" onclick="saveData()" style="flex:1;">💾 Сохранить</button>
+          <button class="btn btn-secondary" onclick="loadData()" style="flex:1;">📂 Загрузить</button>
+        </div>
+        <p id="saveStatus" class="note" style="margin-top:6px; text-align:center;"></p>
+      </div>
+    </div>
+
+    <!-- Рецепты -->
+    <div class="card" style="margin-top:20px;">
+      <h2><span class="icon">📝</span> Рецепты ваших удобрений</h2>
+      <div style="font-size:0.9rem; color:var(--muted); line-height:1.7;">
+        <p><strong style="color:var(--accent);">Самомес Калия</strong> (АкваБиоКлуб)<br>
+          110 г сульфата калия (K₂SO₄) на 1 л горячей воды (дистиллят/осмос)<br>
+          → K ≈ 50 мг/мл · 1 мл на 10 л = +5 мг/л K
+        </p>
+        <p style="margin-top:12px;"><strong style="color:var(--accent);">Самомес Нитратов</strong> (АкваБиоКлуб)<br>
+          80 г калиевой селитры (KNO₃) на 1 л горячей воды<br>
+          → NO₃ ≈ 50 мг/мл + K ≈ 30 мг/мл · 1 мл на 10 л = +5 мг/л NO₃ и +3 мг/л K
+        </p>
+        <p style="margin-top:12px;"><strong style="color:var(--accent);">Самомес Фосфатов</strong><br>
+          7,2 г монофосфата калия (KH₂PO₄, K₂O 34,2% / P₂O₅ 51,5%) на 0,5 л осмоса<br>
+          → PO₄ ≈ 9,92 мг/мл + K ≈ 4,09 мг/мл
+        </p>
+        <p style="margin-top:12px;"><strong style="color:var(--accent);">AQUAERUS МИКРО</strong> (готовый)<br>
+          Fe 1,372 · K 7,92 · Mg 0,915 мг/мл (+ Mn, B, Mo, Cu, Zn, Co)
+        </p>
+        <p style="margin-top:12px;"><strong style="color:var(--accent);">ЖЕЛЕЗО AQUARIUM LIFE</strong> (готовый)<br>
+          Fe 1,0 · Mg 2,1 мг/мл · 10 мл на 100 л = +0,1 мг/л Fe
+        </p>
+        <p style="margin-top:12px;"><strong style="color:var(--accent);">Aquabalance GH-бустер</strong> (сухой)<br>
+          Ca 17,2% · Mg 4,3% → <strong>172 мг/г Ca, 43 мг/г Mg</strong><br>
+          1 мерная ложка (~6,5 г) на 40 л осмоса → +4–5 °dGH и +100 ppm TDS<br>
+          Ваша схема: осмос TDS 3 → ремин до TDS ~150
+        </p>
+      </div>
+    </div>
+
+    <!-- Результаты -->
+    <div class="card results" id="resultsSection" style="display:none; margin-top:24px;">
+      <h2><span class="icon">📊</span> Результаты расчёта</h2>
+      <div id="resultsContent"></div>
+    </div>
+
+    <footer>
+      Калькулятор для аквариумных растений · Данные сохраняются в браузере
+    </footer>
+  </div>
+
+  <script>
+    let fertilizerCount = 0;
+    const elements = ['NO3', 'PO4', 'K', 'Fe', 'Mg', 'Ca'];
+    const elementNames = {
+      NO3: 'NO₃',
+      PO4: 'PO₄',
+      K: 'K',
+      Fe: 'Fe',
+      Mg: 'Mg',
+      Ca: 'Ca'
+    };
+
+    function addFertilizer(name = '', data = {}) {
+      fertilizerCount++;
+      const id = fertilizerCount;
+      const list = document.getElementById('fertilizersList');
+      
+      const safeName = String(name).replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      const div = document.createElement('div');
+      div.className = 'fertilizer-item';
+      div.id = `fert_${id}`;
+      div.innerHTML = `
+        <button class="btn btn-danger remove-btn" onclick="removeFertilizer(${id})">✕</button>
+        <h3>Удобрение #${id}</h3>
+        <div class="form-group">
+          <label>Название</label>
+          <input type="text" id="name_${id}" placeholder="Например: Макро NPK" value="${safeName}">
+        </div>
+        <div class="form-group">
+          <label>Единицы концентрации</label>
+          <select id="concType_${id}">
+            <option value="mgml">мг/мл (жидкое)</option>
+            <option value="percent">% (массовые)</option>
+            <option value="mgg">мг/г (сухое)</option>
+          </select>
+        </div>
+        <div class="elements-grid">
+          ${elements.map(el => `
+            <div class="element-input">
+              <label>${elementNames[el]}</label>
+              <input type="number" id="${el}_${id}" value="${data[el] != null && data[el] !== '' ? data[el] : ''}" min="0" step="0.001" placeholder="0">
+            </div>
+          `).join('')}
+        </div>
+      `;
+      list.appendChild(div);
+    }
+
+    function removeFertilizer(id) {
+      const el = document.getElementById(`fert_${id}`);
+      if (el) el.remove();
+    }
+
+    function getNumber(id) {
+      const val = parseFloat(document.getElementById(id)?.value);
+      return isNaN(val) ? 0 : val;
+    }
+
+    function getConsumptionFactor() {
+      const volume = getNumber('volume') || 100;
+      const watts = getNumber('lightWatts');
+      const wpl = watts / volume; // Вт на литр
+      const hasCO2 = document.getElementById('hasCO2').value === 'yes';
+      const density = document.getElementById('plantDensity').value;
+      const growth = document.getElementById('growthRate').value;
+
+      let factor = 1.0;
+
+      // Свет
+      if (wpl >= 1.0) factor *= 1.6;
+      else if (wpl >= 0.6) factor *= 1.3;
+      else if (wpl >= 0.3) factor *= 1.0;
+      else factor *= 0.6;
+
+      // CO2
+      if (hasCO2) factor *= 1.5;
+      else factor *= 0.7;
+
+      // Плотность посадки
+      if (density === 'high') factor *= 1.35;
+      else if (density === 'low') factor *= 0.65;
+
+      // Скорость роста
+      if (growth === 'fast') factor *= 1.3;
+      else if (growth === 'slow') factor *= 0.55;
+
+      // Низкий KH + CO2 = риск нестабильности pH → чуть снижаем дозы
+      const currentKH = getNumber('current_KH');
+      if (hasCO2 && currentKH > 0 && currentKH < 3) {
+        factor *= 0.85;
+      }
+
+      // TDS: высокий = накопление солей → снижаем дозы
+      const currentTDS = getNumber('current_TDS');
+      const targetTDS = getNumber('target_TDS') || 200;
+      if (currentTDS > 0) {
+        if (currentTDS > 450) factor *= 0.55;          // очень высокий
+        else if (currentTDS > 350) factor *= 0.7;       // высокий
+        else if (currentTDS > targetTDS * 1.4) factor *= 0.8; // заметно выше цели
+        else if (currentTDS < 80) factor *= 0.9;        // очень мягкая вода — аккуратнее
+      }
+
+      // Ограничиваем разумными пределами
+      return Math.max(0.25, Math.min(factor, 3.0));
+    }
+
+    function calculate() {
+      const volume = getNumber('volume');
+      if (volume <= 0) {
+        alert('Укажите объём аквариума');
+        return;
+      }
+
+      const mode = document.getElementById('calcMode').value;
+      const factor = getConsumptionFactor();
+      const targets = {};
+      const currents = {};
+      const needed = {}; // мг/л которые нужно добавить за расчётный период
+
+      elements.forEach(el => {
+        targets[el] = getNumber(`target_${el}`);
+        currents[el] = getNumber(`current_${el}`);
+        
+        if (mode === 'fromZero') {
+          needed[el] = targets[el];
+        } else if (mode === 'daily') {
+          // Недельное потребление ≈ целевая × коэффициент, суточная = /7
+          // Базово берём ~20% от цели как недельное при factor=1
+          const weeklyBase = targets[el] * 0.22 * factor;
+          needed[el] = weeklyBase / 7; // суточная потребность в мг/л
+        } else {
+          needed[el] = Math.max(0, targets[el] - currents[el]);
+        }
+      });
+
+      // Параметры воды (один раз)
+      const targetGH = getNumber('target_GH');
+      const currentGH = getNumber('current_GH');
+      const targetKH = getNumber('target_KH');
+      const currentKH = getNumber('current_KH');
+      const targetTDS = getNumber('target_TDS') || 200;
+      const currentTDS = getNumber('current_TDS');
+      const hasCO2 = document.getElementById('hasCO2').value === 'yes';
+      const watts = getNumber('lightWatts');
+      const wpl = (watts / volume).toFixed(2);
+      const densityText = {low:'Мало', medium:'Средне', high:'Много'}[document.getElementById('plantDensity').value];
+      const growthText = {slow:'Медленнорастущие', mixed:'Смешанные', fast:'Быстрорастущие'}[document.getElementById('growthRate').value];
+
+      // === Учёт GH ===
+      // 1 °dGH ≈ 4.34 мг/л Mg²⁺. Если GH ниже цели — добавляем Mg
+      if (currentGH > 0 && targetGH > currentGH) {
+        const ghDeficit = targetGH - currentGH;
+        const extraMg = ghDeficit * 4.34 * 0.4;
+        if (mode === 'daily') {
+          needed['Mg'] = Math.max(needed['Mg'], extraMg / 7);
+        } else {
+          needed['Mg'] = Math.max(needed['Mg'], extraMg);
+        }
+      }
+
+      // === Учёт низкого KH + CO2 ===
+      if (hasCO2 && currentKH > 0 && currentKH < 2) {
+        needed['Fe'] = needed['Fe'] * 0.7;
+      }
+
+      // Собираем удобрения
+      const fertilizers = [];
+      document.querySelectorAll('.fertilizer-item').forEach(item => {
+        const id = item.id.replace('fert_', '');
+        const name = document.getElementById(`name_${id}`)?.value || `Удобрение #${id}`;
+        const concType = document.getElementById(`concType_${id}`)?.value || 'mgml';
+        
+        const composition = {};
+        let hasAny = false;
+        elements.forEach(el => {
+          const val = getNumber(`${el}_${id}`);
+          composition[el] = val;
+          if (val > 0) hasAny = true;
+        });
+
+        if (hasAny) {
+          fertilizers.push({ id, name, concType, composition });
+        }
+      });
+
+      if (fertilizers.length === 0) {
+        alert('Добавьте хотя бы одно удобрение с составом');
+        return;
+      }
+
+      let html = '';
+
+      function hardnessStatus(current, target, name, unit) {
+        if (current === 0) return `<span style="color:var(--muted)">${name}: нет данных</span>`;
+        const diff = current - target;
+        const tol = name === 'TDS' ? 40 : 1;
+        if (Math.abs(diff) <= tol) return `<span style="color:var(--success)">${name}: ${current}${unit} (норма)</span>`;
+        if (diff > tol) return `<span style="color:var(--warning)">${name}: ${current}${unit} (выше ${target})</span>`;
+        return `<span style="color:var(--warning)">${name}: ${current}${unit} (ниже ${target})</span>`;
+      }
+
+      // Краткая сводка условий
+      html += `<div class="result-card">
+        <h3>Условия и коэффициент потребления</h3>
+        <p style="font-size:0.95rem; margin-bottom:8px;">
+          Свет: <strong>${watts} Вт</strong> (${wpl} Вт/л) · 
+          CO₂: <strong>${hasCO2 ? 'Есть' : 'Нет'}</strong> · 
+          Растения: <strong>${densityText}</strong> · 
+          Рост: <strong>${growthText}</strong>
+        </p>
+        <p style="font-size:0.9rem; margin-bottom:8px;">
+          ${hardnessStatus(currentGH, targetGH, 'GH', ' °dH')} · 
+          ${hardnessStatus(currentKH, targetKH, 'KH', ' °dH')} · 
+          ${hardnessStatus(currentTDS, targetTDS, 'TDS', ' ppm')}
+        </p>
+        <p style="font-size:1.1rem;">
+          Коэффициент потребления: <strong style="color:var(--accent)">${factor.toFixed(2)}×</strong>
+          <span style="color:var(--muted); font-size:0.85rem;"> (1.0 = средние условия)</span>
+        </p>
+      </div>`;
+
+      // Упрощённые рекомендуемые дозировки
+      // Для каждого нужного элемента — одно лучшее удобрение.
+      // Важно: не допускаем передоза Fe при дозировании Mg/других элементов.
+      const neededElements = elements.filter(el => needed[el] > 0.001);
+      const recommendations = {}; // fertName -> {dose, el, unit, fert, note}
+
+      function calcDose(fert, el) {
+        if (!(fert.composition[el] > 0) || !(needed[el] > 0.001)) return Infinity;
+        if (fert.concType === 'mgml' || fert.concType === 'mgg') {
+          return (needed[el] * volume) / fert.composition[el];
+        }
+        return (needed[el] * volume) / (fert.composition[el] * 10);
+      }
+
+      function addedAmount(fert, dose, el) {
+        if (!(fert.composition[el] > 0)) return 0;
+        if (fert.concType === 'mgml' || fert.concType === 'mgg') {
+          return (dose * fert.composition[el]) / volume;
+        }
+        return (dose * fert.composition[el] * 10) / volume;
+      }
+
+      // Макс. допустимая добавка Fe за период (мг/л), чтобы не кормить водоросли
+      const maxFeAdd = mode === 'daily'
+        ? Math.max(needed['Fe'] || 0.02, 0.05)   // в сутки не больше ~0.05–нужды
+        : Math.max(needed['Fe'] || 0.1, 0.15);  // разовая/неделя
+
+      html += `<div class="result-card">
+        <h3>Рекомендуемые дозировки</h3>`;
+
+      if (neededElements.length === 0) {
+        html += `<p style="color:var(--success);">Все целевые концентрации уже достигнуты. Дополнительно вносить ничего не нужно.</p>`;
+      } else {
+        neededElements.forEach(el => {
+          let bestFert = null;
+          let bestDose = Infinity;
+          let bestUnit = 'мл';
+          let bestNote = '';
+
+          fertilizers.forEach(fert => {
+            if (!(fert.composition[el] > 0)) return;
+
+            let dose = calcDose(fert, el);
+            let note = '';
+
+            // Если удобрение содержит Fe, а мы дозируем НЕ железо —
+            // ограничиваем дозу, чтобы не передозировать Fe
+            if (el !== 'Fe' && fert.composition['Fe'] > 0) {
+              const feFromDose = addedAmount(fert, dose, 'Fe');
+              if (feFromDose > maxFeAdd) {
+                // Урезаем дозу до безопасного Fe
+                const safeDose = (maxFeAdd * volume) / fert.composition['Fe'];
+                if (safeDose < dose) {
+                  dose = safeDose;
+                  note = 'доза ограничена по Fe';
+                }
+              }
+            }
+
+            // Для самого Fe предпочитаем удобрение с меньшим «балластом» Mg
+            // (просто минимальный объём — уже учитывается)
+
+            if (dose < bestDose) {
+              bestDose = dose;
+              bestFert = fert;
+              bestUnit = fert.concType === 'mgml' ? 'мл' : 'г';
+              bestNote = note;
+            }
+          });
+
+          if (bestFert && bestDose < Infinity && bestDose > 0) {
+            const key = bestFert.name;
+            if (!recommendations[key] || bestDose > recommendations[key].dose) {
+              recommendations[key] = {
+                dose: bestDose,
+                el: el,
+                unit: bestUnit,
+                fert: bestFert,
+                note: bestNote
+              };
+            }
+          }
+        });
+
+        // Для Fe: добавляем ВСЕ удобрения с железом как варианты
+        // (чтобы «ЖЕЛЕЗО AQUARIUM LIFE» тоже отображалось, не только AQUAERUS)
+        if (needed['Fe'] > 0.001) {
+          fertilizers.forEach(fert => {
+            if (!(fert.composition['Fe'] > 0)) return;
+            const key = fert.name;
+            if (recommendations[key]) return; // уже есть
+            const dose = calcDose(fert, 'Fe');
+            if (dose < Infinity && dose > 0) {
+              recommendations[key] = {
+                dose: dose,
+                el: 'Fe',
+                unit: fert.concType === 'mgml' ? 'мл' : 'г',
+                fert: fert,
+                note: 'альтернатива по Fe'
+              };
+            }
+          });
+        }
+
+        html += `<p style="font-size:0.9rem; color:var(--muted); margin-bottom:10px;">
+          Нужно добавить: <strong>${neededElements.map(el => elementNames[el]).join(', ')}</strong>
+        </p>
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th>Удобрение</th>
+              <th>Ежедневно</th>
+              <th>В неделю</th>
+              <th>Покрывает</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        Object.keys(recommendations).forEach(name => {
+          const rec = recommendations[name];
+          let dailyDose, weeklyDose;
+
+          if (mode === 'daily') {
+            dailyDose = rec.dose;
+            weeklyDose = rec.dose * 7;
+          } else {
+            weeklyDose = rec.dose;
+            dailyDose = rec.dose / 7;
+          }
+
+          const dStr = dailyDose < 0.1 ? dailyDose.toFixed(3) : dailyDose.toFixed(2);
+          const wStr = weeklyDose < 0.1 ? weeklyDose.toFixed(3) : weeklyDose.toFixed(1);
+
+          const covered = [];
+          elements.forEach(el => {
+            if (rec.fert.composition[el] > 0 && needed[el] > 0.001) {
+              const added = addedAmount(rec.fert, rec.dose, el);
+              if (added >= needed[el] * 0.9) {
+                covered.push(elementNames[el]);
+              } else if (added > 0.01) {
+                covered.push(elementNames[el] + ' (~' + added.toFixed(2) + ')');
+              }
+            }
+          });
+
+          const noteStr = rec.note ? ` <span style="color:var(--warning);font-size:0.8rem">(${rec.note})</span>` : '';
+
+          html += `<tr>
+            <td><strong>${name}</strong>${noteStr}</td>
+            <td class="dose">${dStr} ${rec.unit}</td>
+            <td>${wStr} ${rec.unit}</td>
+            <td>${covered.join(', ') || elementNames[rec.el]}</td>
+          </tr>`;
+        });
+
+        html += `</tbody></table>
+          <p class="note" style="margin-top:12px;">
+            ${mode === 'daily' 
+              ? '💡 По Fe показаны все источники (AQUAERUS и ЖЕЛЕЗО). Выберите <strong>один</strong> — не лейте оба на полную дозу. Mg/Ca — из GH-бустера при подменах.' 
+              : '💡 По Fe — все варианты. Выберите одно удобрение с железом. Разовую дозу лучше разбить на 3–7 внесений.'}
+          </p>`;
+      }
+
+      html += `</div>`;
+
+      // Краткие советы
+      html += `<div class="result-card">
+        <h3>Советы</h3>
+        <ul style="padding-left:18px; font-size:0.9rem; color:var(--muted);">
+          <li>Лучше чуть недокормить, чем перекормить (особенно PO₄ и Fe).</li>
+          <li>При появлении водорослей — уменьшите дозы на 30–50% и увеличьте подмены.</li>
+          <li>Подмена воды 30–50% раз в неделю сильно помогает стабильности.</li>
+          <li>Fe и микро лучше вносить утром перед включением света.</li>
+        </ul>
+      </div>`;
+
+      document.getElementById('resultsContent').innerHTML = html;
+      document.getElementById('resultsSection').style.display = 'block';
+      document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function getAllInputIds() {
+      return [
+        'volume', 'lightWatts', 'hasCO2', 'plantDensity', 'growthRate', 'calcMode',
+        'target_NO3', 'current_NO3', 'target_PO4', 'current_PO4',
+        'target_K', 'current_K', 'target_Fe', 'current_Fe',
+        'target_Mg', 'current_Mg', 'target_Ca', 'current_Ca',
+        'target_GH', 'current_GH', 'target_KH', 'current_KH',
+        'target_TDS', 'current_TDS'
+      ];
+    }
+
+    function saveData() {
+      const data = { inputs: {}, fertilizers: [] };
+
+      getAllInputIds().forEach(id => {
+        const el = document.getElementById(id);
+        if (el) data.inputs[id] = el.value;
+      });
+
+      document.querySelectorAll('.fertilizer-item').forEach(item => {
+        const id = item.id.replace('fert_', '');
+        const fert = {
+          name: document.getElementById(`name_${id}`)?.value || '',
+          concType: document.getElementById(`concType_${id}`)?.value || 'mgml',
+          composition: {}
+        };
+        elements.forEach(el => {
+          fert.composition[el] = document.getElementById(`${el}_${id}`)?.value || '';
+        });
+        data.fertilizers.push(fert);
+      });
+
+      localStorage.setItem('aquaFertCalculator', JSON.stringify(data));
+      const status = document.getElementById('saveStatus');
+      status.textContent = '✓ Данные сохранены';
+      status.style.color = 'var(--success)';
+      setTimeout(() => { status.textContent = ''; }, 2500);
+    }
+
+    function loadData(silent) {
+      const raw = localStorage.getItem('aquaFertCalculator');
+      if (!raw) {
+        if (!silent) {
+          const status = document.getElementById('saveStatus');
+          status.textContent = 'Нет сохранённых данных';
+          status.style.color = 'var(--warning)';
+          setTimeout(() => { status.textContent = ''; }, 2500);
+        }
+        return false;
+      }
+
+      try {
+        const data = JSON.parse(raw);
+
+        // Восстанавливаем поля
+        if (data.inputs) {
+          Object.keys(data.inputs).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = data.inputs[id];
+          });
+        }
+
+        // Восстанавливаем удобрения только если они есть в сохранении
+        let loadedCount = 0;
+        if (data.fertilizers && data.fertilizers.length > 0) {
+          document.getElementById('fertilizersList').innerHTML = '';
+          fertilizerCount = 0;
+          data.fertilizers.forEach(f => {
+            if (!f || !f.name) return;
+            const nums = {};
+            if (f.composition) {
+              elements.forEach(el => {
+                const v = parseFloat(f.composition[el]);
+                if (!isNaN(v)) nums[el] = v;
+              });
+            }
+            addFertilizer(f.name, nums);
+            const lastId = fertilizerCount;
+            const sel = document.getElementById(`concType_${lastId}`);
+            if (sel && f.concType) sel.value = f.concType;
+            loadedCount++;
+          });
+        }
+
+        // Если удобрений нет — оставляем / ставим ваши 5
+        if (loadedCount === 0) {
+          loadDefaultFertilizers();
+        }
+
+        if (!silent) {
+          const status = document.getElementById('saveStatus');
+          status.textContent = '✓ Данные загружены';
+          status.style.color = 'var(--success)';
+          setTimeout(() => { status.textContent = ''; }, 2500);
+        }
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    }
+
+    function loadDefaultFertilizers() {
+      document.getElementById('fertilizersList').innerHTML = '';
+      fertilizerCount = 0;
+      addFertilizer('Самомес Калия (АкваБиоКлуб)', { K: 50 });
+      addFertilizer('Самомес Нитратов (АкваБиоКлуб)', { NO3: 50, K: 30 });
+      addFertilizer('Самомес Фосфатов (монофосфат калия)', { PO4: 9.92, K: 4.09 });
+      addFertilizer('AQUAERUS МИКРО', { Fe: 1.372, K: 7.92, Mg: 0.915 });
+      addFertilizer('ЖЕЛЕЗО AQUARIUM LIFE', { Fe: 1.0, Mg: 2.1 });
+      // Aquabalance GH-бустер: Ca 17.2%, Mg 4.3% → 172 мг/г Ca, 43 мг/г Mg
+      addFertilizer('Aquabalance GH-бустер', { Ca: 172, Mg: 43 });
+      const boostId = fertilizerCount;
+      const sel = document.getElementById('concType_' + boostId);
+      if (sel) sel.value = 'mgg';
+    }
+
+    window.onload = function() {
+      // Всегда ставим ваши 5 удобрений
+      loadDefaultFertilizers();
+
+      // Подтягиваем только сохранённые параметры аквариума (объём, свет, тесты...)
+      const raw = localStorage.getItem('aquaFertCalculator');
+      if (raw) {
+        try {
+          const data = JSON.parse(raw);
+          if (data.inputs) {
+            Object.keys(data.inputs).forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.value = data.inputs[id];
+            });
+          }
+        } catch (e) {}
+      }
+    };
+  </script>
+</body>
+</html>
